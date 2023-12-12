@@ -1,0 +1,9 @@
+GET http://localhost:8080/hello
+Connection: Keep-Alive
+User-Agent: Apache-HttpClient/4.5.14 (Java/17.0.7)
+Accept-Encoding: br,deflate,gzip,x-gzip
+
+<> 2023-12-12T180504.200.txt
+
+###
+

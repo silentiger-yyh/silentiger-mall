@@ -48,6 +48,25 @@
       <version>5.9.2</version>
       <scope>test</scope>
     </dependency>
+<!--    配置中心-->
+    <dependency>
+      <groupId>com.alibaba.cloud</groupId>
+      <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+    </dependency>
+<!--    服务发现-->
+    <dependency>
+      <groupId>com.alibaba.cloud</groupId>
+      <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+    </dependency>
+    <!--   解决报错Add a spring.config.import=nacos: property to your configuration.
+If configuration is not required add spring.config.import=optional:nacos: instead.
+To disable this check, set spring.cloud.nacos.config.import-check.enabled=false.
+    -->
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-bootstrap</artifactId>
+    </dependency>
+
     <!-- commons-lang3 -->
     <dependency>
       <groupId>org.apache.commons</groupId>

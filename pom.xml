@@ -13,7 +13,7 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
-    <module>mall-nacos</module>
+    <module>mall-admin</module>
   </modules>
 
 <!--  父工程定义的属性子工程会继承-->
@@ -35,7 +35,6 @@
       <artifactId>spring-boot-starter-web</artifactId>
       <version>${spring.boot.version}</version>
     </dependency>
-
     <!-- test -->
     <dependency>
       <groupId>org.springframework.boot</groupId>

@@ -23,16 +23,3 @@ spring:
         namespace: 7274eeb1-8473-45b7-96e2-2813da4e959f
         # 设置为false可以只发现其他服务但不注册自身，用于本地代码调试
         register-enabled: true
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-      routes:
-        # 采用自定义路由 ID
-        - id: mall-cloud-demo-route
-          # 这里lb后面应该填写服务名称
-          uri: lb://mall-cloud-demo
-          predicates:
-            - Path=/demo/**
-          filters:
-            - RewritePath=/demo(?<segment>/?.*), /$\{segment}

@@ -8,15 +8,16 @@
     <relativePath/>
   </parent>
 
-  <groupId>org.example</groupId>
+  <groupId>silentiger-mall</groupId>
   <artifactId>silentiger-mall-cloud</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
     <module>mall-admin</module>
+    <module>mall-portal</module>
   </modules>
 
-<!--  父工程定义的属性子工程会继承-->
+  <!--  父工程定义的属性子工程会继承-->
   <properties>
     <spring.boot.version>2.7.14</spring.boot.version>
     <springcloud.version>2021.0.5</springcloud.version>
@@ -25,9 +26,10 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
 
-<!--如果父pom中是<dependencies>时，那么子pom会自动继承父pom依赖，不需要子pom去导入
-这里是所有springboot子模块公共依赖
--->
+  <!--
+  如果父pom中是<dependencies>时，那么子pom会自动继承父pom依赖，不需要子pom去导入
+  这里是所有springboot子模块公共依赖
+  -->
   <dependencies>
     <!-- spring boot starters -->
     <dependency>
@@ -48,19 +50,21 @@
       <version>5.9.2</version>
       <scope>test</scope>
     </dependency>
-<!--    配置中心-->
+  <!--    配置中心-->
     <dependency>
       <groupId>com.alibaba.cloud</groupId>
       <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
     </dependency>
-<!--    服务发现-->
+  <!--    服务发现-->
     <dependency>
       <groupId>com.alibaba.cloud</groupId>
       <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
     </dependency>
     <!--   解决报错Add a spring.config.import=nacos: property to your configuration.
-If configuration is not required add spring.config.import=optional:nacos: instead.
-To disable this check, set spring.cloud.nacos.config.import-check.enabled=false.
+    If configuration is not required add spring.config.import=optional:nacos: instead.
+    To disable this check, set spring.cloud.nacos.config.import-check.enabled=false.
+
+    在springboot2.4+中无法使用bootstrap，这个注解可以重新启用
     -->
     <dependency>
       <groupId>org.springframework.cloud</groupId>
@@ -103,10 +107,11 @@ To disable this check, set spring.cloud.nacos.config.import-check.enabled=false.
     </dependency>
   </dependencies>
 
-<!--  如果父pom中是<dependencyManagement>
- 则子pom不会自动继承父pom的依赖，除非子pom中声明，声明需要groupId和artifactId，无需给到version
- 第二种方法是用来约束子pom，若要使用，需声明
- -->
+  <!--
+    如果父pom中是<dependencyManagement>
+   则子pom不会自动继承父pom的依赖，除非子pom中声明，声明需要groupId和artifactId，无需给到version
+   第二种方法是用来约束子pom，若要使用，需声明
+   -->
   <dependencyManagement>
     <dependencies>
       <dependency>

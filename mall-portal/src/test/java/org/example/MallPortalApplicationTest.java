@@ -8,8 +8,8 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * 这个注解可以解决：Test ignored. java.lang.IllegalStateException: Found multiple @SpringBootConfiguration annotated classes [Generic bean:
  */
-@ContextConfiguration(classes = MallAdminApplication.class)
-class DemoApplicationTests {
+@ContextConfiguration(classes = MallPortalApplication.class)
+class MallPortalApplicationTest {
 
     @Test
     void contextLoads() {

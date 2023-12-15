@@ -7,10 +7,10 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>mall-admin</artifactId>
+    <artifactId>mall-portal</artifactId>
     <packaging>jar</packaging>
 
-    <name>mall-admin</name>
+    <name>mall-portal</name>
 
     <properties>
     </properties>

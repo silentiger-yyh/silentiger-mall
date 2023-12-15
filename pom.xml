@@ -14,7 +14,11 @@
   <packaging>pom</packaging>
   <modules>
     <module>mall-admin</module>
+    <module>mall-common</module>
+    <module>mall-auth</module>
     <module>mall-portal</module>
+    <module>mall-gateway</module>
+    <module>mall-cloud-demo</module>
   </modules>
 
   <!--  父工程定义的属性子工程会继承-->
@@ -22,6 +26,10 @@
     <spring.boot.version>2.7.14</spring.boot.version>
     <springcloud.version>2021.0.5</springcloud.version>
     <springcloud.alibaba.version>2021.0.5.0</springcloud.alibaba.version>
+    <mysql-connector-java.version>8.0.19</mysql-connector-java.version>
+    <springboot-starter-jdbc.version>3.2.0</springboot-starter-jdbc.version>
+    <druid-spring-boot-starter.version>1.1.23</druid-spring-boot-starter.version>
+    <mybatis-plus-boot-starter.version>3.4.3.4</mybatis-plus-boot-starter.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
@@ -31,12 +39,6 @@
   这里是所有springboot子模块公共依赖
   -->
   <dependencies>
-    <!-- spring boot starters -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-      <version>${spring.boot.version}</version>
-    </dependency>
     <!-- test -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -82,29 +84,7 @@
       <artifactId>lombok</artifactId>
       <version>1.18.16</version>
     </dependency>
-    <!-- mysql -->
-    <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <version>8.0.19</version>
-    </dependency>
-    <!--jdbc 数据库连接-->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-jdbc</artifactId>
-    </dependency>
-    <!-- druid -->
-    <dependency>
-      <groupId>com.alibaba</groupId>
-      <artifactId>druid-spring-boot-starter</artifactId>
-      <version>1.1.23</version>
-    </dependency>
-    <!-- mybatis plus -->
-    <dependency>
-      <groupId>com.baomidou</groupId>
-      <artifactId>mybatis-plus-boot-starter</artifactId>
-      <version>3.4.3.4</version>
-    </dependency>
+
   </dependencies>
 
   <!--
@@ -114,6 +94,12 @@
    -->
   <dependencyManagement>
     <dependencies>
+      <!-- spring boot starters -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+        <version>${spring.boot.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
@@ -141,6 +127,30 @@
         <version>${springcloud.alibaba.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <!-- mysql -->
+      <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>${mysql-connector-java.version}</version>
+      </dependency>
+      <!--jdbc 数据库连接-->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-jdbc</artifactId>
+        <version>${springboot-starter-jdbc.version}</version>
+      </dependency>
+      <!-- druid -->
+      <dependency>
+        <groupId>com.alibaba</groupId>
+        <artifactId>druid-spring-boot-starter</artifactId>
+        <version>${druid-spring-boot-starter.version}</version>
+      </dependency>
+      <!-- mybatis plus -->
+      <dependency>
+        <groupId>com.baomidou</groupId>
+        <artifactId>mybatis-plus-boot-starter</artifactId>
+        <version>${mybatis-plus-boot-starter.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

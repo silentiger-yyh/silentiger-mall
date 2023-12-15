@@ -425,10 +425,34 @@
                - StripPrefix=1       # 使用过滤器 
    
    
-   # 关于filters的过滤器说明：
+   # 
    # - StripPrefix=1: 以http://localhost:9999/mall-demo/demo/time为例
      # 若无StripPrefix，网关转发到微服务的请求不会过滤掉前缀mall-demo
      # 若有StripPrefix，网关转发到微服务的请求w'w'w会过滤掉前缀mall-demo，=1代表过滤掉一个前缀
    ```
 
-   
+   **关于filters的过滤器说明：**
+
+   1. StripPrefix过滤器
+
+      ```yaml
+      filters:
+       - StripPrefix=1       # 使用过滤器 
+      ```
+
+      - 若无StripPrefix，网关转发到微服务的请求不会过滤掉前缀mall-demo
+
+      - 若有StripPrefix，网关转发到微服务的请求w'w'w会过滤掉前缀mall-demo，=1代表过滤掉一个前缀
+
+   2. PrefixPath 过滤器
+
+      - 作用： 它的作用和`StripPrefix`正相反，是在URL路径前面添加一部分的前缀
+
+      ```yaml
+      filters:
+        - PrefixPath=/lbs
+      ```
+
+      这将会把`/lbs`添加到路由`prefixpath_route`匹配到的所有请求的路径的前面。
+
+      所以对`/hello`的请求将会被发送到`/lbs/hello`。

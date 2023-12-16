@@ -30,7 +30,8 @@
     <springboot-starter-jdbc.version>3.2.0</springboot-starter-jdbc.version>
     <druid-spring-boot-starter.version>1.1.23</druid-spring-boot-starter.version>
     <mybatis-plus-boot-starter.version>3.4.3.4</mybatis-plus-boot-starter.version>
-    <knife4j-spring-boot-starter.version>3.0.3</knife4j-spring-boot-starter.version>
+    <knife4j-openapi2-spring-boot-starter.version>4.3.0</knife4j-openapi2-spring-boot-starter.version>
+    <knife4j-gateway-spring-boot-starter.version>4.3.0</knife4j-gateway-spring-boot-starter.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
@@ -153,18 +154,19 @@
         <artifactId>mybatis-plus-boot-starter</artifactId>
         <version>${mybatis-plus-boot-starter.version}</version>
       </dependency>
+      <!-- springboot与knife4j兼容性与版本有关，参考官网https://doc.xiaominfo.com/docs/quick-start/start-knife4j-version
+      4.0版本之后提供了gateway网关聚合
+      -->
       <dependency>
         <groupId>com.github.xiaoymin</groupId>
-        <artifactId>knife4j-spring-boot-starter</artifactId>
-        <!--在引用时请在maven中央仓库搜索3.X最新版本号-->
-        <version>${knife4j-spring-boot-starter.version}</version>
+        <artifactId>knife4j-openapi2-spring-boot-starter</artifactId>
+        <version>${knife4j-openapi2-spring-boot-starter.version}</version>
       </dependency>
-
-<!--      <dependency>-->
-<!--        <groupId>com.github.xiaoymin</groupId>-->
-<!--        <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>-->
-<!--        <version>${knife4j-openapi3-jakarta-spring-boot-starter.version}</version>-->
-<!--      </dependency>-->
+      <dependency>
+        <groupId>com.github.xiaoymin</groupId>
+        <artifactId>knife4j-gateway-spring-boot-starter</artifactId>
+        <version>${knife4j-gateway-spring-boot-starter.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

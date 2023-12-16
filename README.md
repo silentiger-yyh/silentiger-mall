@@ -310,7 +310,7 @@
            # 命名空间ID（不是名称）
            namespace: 7274eeb1-8473-45b7-96e2-2813da4e959f
            # 配置中心的地址
-           server-addr: 192.168.83.142:8848
+           server-addr: nacos:8848
            # 配置文件prefix
            prefix: ${spring.application.name}
            # 配置文件的格式
@@ -319,7 +319,7 @@
            group: DEFAULT_GROUP
          discovery:
            # 注册中心地址
-           server-addr: 192.168.83.142:8848
+           server-addr: nacos:8848
            # 所属命名空间id，用于区分开发、测试、生产
            namespace: 7274eeb1-8473-45b7-96e2-2813da4e959f
            # 设置为false可以只发现其他服务但不注册自身，用于本地代码调试
@@ -386,7 +386,7 @@
            # 命名空间
            namespace: 7274eeb1-8473-45b7-96e2-2813da4e959f
            # 配置中心的地址
-           server-addr: 192.168.83.142:8848
+           server-addr: nacos:8848
            # 配置文件prefix
            prefix: ${spring.application.name}
            # 配置文件的格式
@@ -395,7 +395,7 @@
            group: DEFAULT_GROUP
          discovery:
            # 注册中心地址
-           server-addr: 192.168.83.142:8848
+           server-addr: nacos:8848
            # 所属命名空间id，用于区分开发、测试、生产
            namespace: 7274eeb1-8473-45b7-96e2-2813da4e959f
            # 设置为false可以只发现其他服务但不注册自身，用于本地代码调试

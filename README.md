@@ -415,12 +415,12 @@
              enabled: false
          routes:
            # 采用自定义路由 ID,可以添加多个路由
-           - id: mall-cloud-demo-route
+           - id: mall-cloud-demo
              #lb 表示从 nacos 中按照名称获取微服务,并遵循负载均衡策略，user-service 对应微服务应用名
              uri: lb://mall-cloud-demo
              # 断言，路径匹配
              predicates:
-               - Path=/mall-demo/**
+               - Path=/mall-cloud-demo/**
              filters:
                - StripPrefix=1       # 使用过滤器 
    
@@ -456,3 +456,218 @@
       这将会把`/lbs`添加到路由`prefixpath_route`匹配到的所有请求的路径的前面。
 
       所以对`/hello`的请求将会被发送到`/lbs/hello`。
+
+### gateway聚合knife4j（swagger2规范）
+
+#### **第一步**：在子模块mall-cloud-demo中添加依赖
+
+这里没有写版本号，因为版本号在父工程的pom中指定了，这里用的是4.3.0版本
+
+```xml
+<dependency>
+    <groupId>com.github.xiaoymin</groupId>
+    <artifactId>knife4j-openapi2-spring-boot-starter</artifactId>
+</dependency>
+```
+
+#### **第二步**：在nacos配置中心mall-cloud-demo.yaml中添加knife4j配置
+
+```yaml
+# knife4j
+knife4j:
+  enable: true
+  openapi:
+    title: Knife4j官方文档
+    description: "`我是测试`,**你知道吗9**"
+    email: xiaoymin@foxmail.com
+    concat: 八一菜刀
+    url: https://docs.xiaominfo.com
+    version: v4.0
+    license: Apache 2.0
+    license-url: https://stackoverflow.com/
+    terms-of-service-url: https://stackoverflow.com/
+    group:
+      test1:
+        group-name: default  # 注意这里一定要是default分组
+        api-rule: package
+        api-rule-resources:
+          - org.example.controller
+```
+
+**注意：**对于分组名称，必须是**default**，因为在后续的gateway聚合方式中，采用的是discovery，也就是服务发现的方式，官方也说明了这种方式的分组名称必须是default
+
+#### **第三步**：写测试接口，并启动服务，打开mall-cloud-demo服务的接口文档查看是否配置成功
+
+```java
+@RestController
+@RequestMapping("/demo")
+@Api(tags = "测试controller")
+public class DemoController {
+    @GetMapping("/time")
+    @ApiOperation("测试接口")
+    public String getTime() {
+        return String.valueOf(DateUtil.getTimeNow());
+    }
+}
+```
+
+访问 http://localhost:8080/doc.html（注意：这里访问的是demo服务，不是网关）
+
+![image-20231216153736618](images/image-20231216153736618.png)
+
+#### 第四步（聚合1）：在gateway网关pom中添加依赖
+
+两个版本都是4.3.0，在父工程的pom中指定了
+
+```xml
+<dependency>
+    <groupId>com.github.xiaoymin</groupId>
+    <artifactId>knife4j-openapi2-spring-boot-starter</artifactId>
+</dependency>
+<dependency>
+    <groupId>com.github.xiaoymin</groupId>
+    <artifactId>knife4j-gateway-spring-boot-starter</artifactId>
+</dependency>
+```
+
+#### 第五步（聚合2）：在nacos配置中心的mall-gateway.yaml中添加knife4j配置
+
+```yaml
+knife4j:
+  gateway:
+    # ① 第一个配置，开启gateway聚合组件
+    enabled: true
+    # ② 第二行配置，设置聚合模式采用discover服务发现的模式
+    strategy: discover
+    discover:
+      # ③ 第三行配置，开启discover模式
+      enabled: true
+      # ④ 第四行配置，聚合子服务全部为Swagger2规范的文档
+      version: swagger2
+```
+
+这里有个点需要非常注意的，在配置gateway路由ID的时候，为了不给自己挖坑，把ID配置成服务名称，然后断言中也配置成服务名称，因为gateway聚合接口时需要调用微服务的  /v2/api-docs  接口获取服务接口信息，在调接口的时候需要指定服务，也就是需要添加接口前缀，这个前缀必须要和断言中配置的能匹配上才能调通接口，所以为了不给自己挖坑就配置一样的吧。
+
+当然，也不是绝对的，因为这个前缀时可以通过一些方法获取的，可直接拿到断言中配置的Path信息，但是这样会稍显麻烦。
+
+```yaml
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      routes:
+        # 采用自定义路由 ID
+        - id: mall-cloud-demo
+          #lb 表示从 nacos 中按照名称获取微服务,并遵循负载均衡策略，user-service 对应微服务应用名
+          uri: lb://mall-cloud-demo
+          # 断言，路径匹配
+          predicates:
+            - Path=/mall-cloud-demo/**
+          filters:
+            - StripPrefix=1       # 使用过滤器 
+```
+
+#### 第六步（聚合3）：在gateway中添加 /swagger-resources接口
+
+在访问gateway的接口文档中心的时候，会先调用/swagger-resources获取资源信息，也就是左上角的下拉菜单选项。
+
+![image-20231216160101474](images/image-20231216160101474.png)
+
+1. 先创建一个`Knife4jResourceProvider`
+
+   ```java
+   
+   import lombok.RequiredArgsConstructor;
+   import org.springframework.beans.factory.annotation.Autowired;
+   import org.springframework.beans.factory.annotation.Value;
+   import org.springframework.cloud.client.discovery.DiscoveryClient;
+   import org.springframework.cloud.gateway.route.RouteLocator;
+   import org.springframework.stereotype.Component;
+   import org.springframework.util.CollectionUtils;
+   import springfox.documentation.swagger.web.SwaggerResource;
+   import springfox.documentation.swagger.web.SwaggerResourcesProvider;
+   
+   import java.util.ArrayList;
+   import java.util.List;
+   
+   /**
+    * description: 这里就是从路由配置中获取各个服务的路由信息
+    * author: silentiger@yyh
+    * date: 2023-12-16
+    */
+   @Component
+   @RequiredArgsConstructor
+   public class Knife4jResourceProvider implements SwaggerResourcesProvider {
+       // swagger2默认的url后缀
+       private static final String SWAGGER2_URL = "/v2/api-docs";
+       // 路由定位器
+       private final RouteLocator routeLocator;
+       // 网关应用名称
+       @Value("${spring.application.name}")
+       private String gatewayName;
+       // nacos客户端
+       @Autowired
+       private DiscoveryClient discoveryClient;
+       /**
+        * 获取 Swagger 资源
+        *    获取条件：所有配置的网关路由服务 - 排除网关地址 - 未注册到nacos的服务或者nacos存在异常的服务
+        */
+       @Override
+       public List<SwaggerResource> get() {
+           List<SwaggerResource> resources = new ArrayList<>();
+           List<String> routeHosts = new ArrayList<>();
+           // 1. 获取路由Uri 中的Host=> 服务注册则为服务名=> app-service001
+           routeLocator.getRoutes()
+                   .filter(route -> route.getId() != null)
+                   //过滤掉网关的文档信息
+                   .filter(route -> !gatewayName.equals(route.getId()))
+                   //根据服务状态注入api文档信息
+                   .filter(route -> !CollectionUtils.isEmpty(discoveryClient.getInstances(route.getUri().getHost())))
+                   .subscribe(route -> routeHosts.add(route.getId()));   // 获取routeID作为"/v2/api-docs"的前缀
+           // 2. 创建自定义资源
+           for (String routeHost : routeHosts) {
+               String serviceUrl = "/" + routeHost + SWAGGER2_URL; // 后台访问添加服务名前缀
+               SwaggerResource swaggerResource = new SwaggerResource(); // 创建Swagger 资源
+               swaggerResource.setUrl(serviceUrl); // 设置访问地址
+               swaggerResource.setName(routeHost); // 设置名称
+               swaggerResource.setSwaggerVersion("2.0.0");
+               resources.add(swaggerResource);
+           }
+           return resources;
+       }
+   }
+   ```
+
+2. 创建接口 `Knife4jResourceController`
+
+   ```java
+   import lombok.RequiredArgsConstructor;
+   import org.example.config.Knife4jResourceProvider;
+   import org.springframework.http.HttpStatus;
+   import org.springframework.http.ResponseEntity;
+   import org.springframework.web.bind.annotation.RequestMapping;
+   import org.springframework.web.bind.annotation.RestController;
+   import springfox.documentation.swagger.web.SwaggerResource;
+   
+   import java.util.List;
+   
+   @RestController
+   @RequestMapping("/swagger-resources")
+   @RequiredArgsConstructor
+   public class Knife4jResourceController {
+       private final Knife4jResourceProvider knife4jResourceProvider;
+       @RequestMapping
+       public ResponseEntity<List<SwaggerResource>> swaggerResources() {
+           return new ResponseEntity<>(knife4jResourceProvider.get(), HttpStatus.OK);
+       }
+   }
+   ```
+
+   #### 第七步：访问网关查看
+
+   http://gatewayIp:port/doc.html
+
+   最终效果见第六步图片
+

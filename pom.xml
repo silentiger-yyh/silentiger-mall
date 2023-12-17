@@ -33,6 +33,7 @@
     <mybatis-plus-boot-starter.version>3.4.3.4</mybatis-plus-boot-starter.version>
     <knife4j-openapi2-spring-boot-starter.version>4.3.0</knife4j-openapi2-spring-boot-starter.version>
     <knife4j-gateway-spring-boot-starter.version>4.3.0</knife4j-gateway-spring-boot-starter.version>
+    <spring-security-oauth2.version>2.5.0.RELEASE</spring-security-oauth2.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
@@ -167,6 +168,12 @@
         <groupId>com.github.xiaoymin</groupId>
         <artifactId>knife4j-gateway-spring-boot-starter</artifactId>
         <version>${knife4j-gateway-spring-boot-starter.version}</version>
+      </dependency>
+      <!--        Oauth2-->
+      <dependency>
+        <groupId>org.springframework.security.oauth</groupId>
+        <artifactId>spring-security-oauth2</artifactId>
+        <version>${spring-security-oauth2.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

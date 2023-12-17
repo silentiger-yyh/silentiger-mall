@@ -12,7 +12,7 @@ spring:
         server-addr: nacos:8848
         # 配置文件prefix
         prefix: ${spring.application.name}
-        # 配置文件的格式
+        # 配置文件的格pas30083432
         file-extension: yaml
         # 配置文件的环境
         group: DEFAULT_GROUP

@@ -62,15 +62,15 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
-        //开启密码授权类型
-        endpoints.authenticationManager(authenticationManager);
-        //配置token存储方式
-        endpoints.tokenStore(tokenStore);
-        //自定义登录或者鉴权失败时的返回信息
-        endpoints.exceptionTranslator(webResponseExceptionTranslator);
-        //要使用refresh_token的话，需要额外配置userDetailsService
-        endpoints.userDetailsService(userDetailService);
-
+        endpoints
+            //开启密码授权类型
+            .authenticationManager(authenticationManager)
+            //配置token存储方式
+            .tokenStore(tokenStore)
+            //自定义登录或者鉴权失败时的返回信息
+            .exceptionTranslator(webResponseExceptionTranslator)
+            //要使用refresh_token的话，需要额外配置userDetailsService
+            .userDetailsService(userDetailService);
     }
 
 

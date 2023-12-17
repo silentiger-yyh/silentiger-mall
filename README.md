@@ -12,7 +12,7 @@
 - druid-spring-boot-starter：1.1.23
 - mybatis-plus-boot-starter：3.4.3.4
 
-## 开发框架搭建
+## 开发环境搭建
 
 ### 父工程创建以及子工程demo
 
@@ -670,4 +670,585 @@ spring:
    http://gatewayIp:port/doc.html
 
    最终效果见第六步图片
+
+### 整合Oauth2
+
+在mall-auth服务中整合
+
+oauth2根据使用场景不同，分成了4种模式
+
+- 授权码模式（authorization code）
+- 简化模式（implicit）
+- 密码模式（resource owner password credentials）
+- 客户端模式（client credentials）
+
+在项目中我们通常使用授权码模式，也是四种模式中最复杂的，通常网站中经常出现的微博，qq第三方登录，都会采用这个形式。
+
+Oauth2授权主要由两部分组成：
+
+- Authorization server：认证服务
+- Resource server：资源服务
+
+在实际项目中以上两个服务可以在一个服务器上，也可以分开部署。下面结合spring boot来说明如何使用。
+
+#### 准备工作：建数据库表
+
+客户端信息可以存储在内存、redis和数据库。在实际项目中通常使用redis和数据库存储。本文采用数据库。表及字段说明参照：[Oauth2数据库表说明](https://andaily.com/spring-oauth-server/db_table_description.html) 。
+
+```sql
+DROP TABLE IF EXISTS `clientdetails`;
+DROP TABLE IF EXISTS `oauth_access_token`;
+DROP TABLE IF EXISTS `oauth_approvals`;
+DROP TABLE IF EXISTS `oauth_client_details`;
+DROP TABLE IF EXISTS `oauth_client_token`;
+DROP TABLE IF EXISTS `oauth_refresh_token`;
+
+CREATE TABLE `clientdetails` (
+  `appId` varchar(128) NOT NULL,
+  `resourceIds` varchar(256) DEFAULT NULL,
+  `appSecret` varchar(256) DEFAULT NULL,
+  `scope` varchar(256) DEFAULT NULL,
+  `grantTypes` varchar(256) DEFAULT NULL,
+  `redirectUrl` varchar(256) DEFAULT NULL,
+  `authorities` varchar(256) DEFAULT NULL,
+  `access_token_validity` int(11) DEFAULT NULL,
+  `refresh_token_validity` int(11) DEFAULT NULL,
+  `additionalInformation` varchar(4096) DEFAULT NULL,
+  `autoApproveScopes` varchar(256) DEFAULT NULL,
+  PRIMARY KEY (`appId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `oauth_access_token` (
+  `token_id` varchar(256) DEFAULT NULL,
+  `token` blob,
+  `authentication_id` varchar(128) NOT NULL,
+  `user_name` varchar(256) DEFAULT NULL,
+  `client_id` varchar(256) DEFAULT NULL,
+  `authentication` blob,
+  `refresh_token` varchar(256) DEFAULT NULL,
+  PRIMARY KEY (`authentication_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `oauth_approvals` (
+  `userId` varchar(256) DEFAULT NULL,
+  `clientId` varchar(256) DEFAULT NULL,
+  `scope` varchar(256) DEFAULT NULL,
+  `status` varchar(10) DEFAULT NULL,
+  `expiresAt` datetime DEFAULT NULL,
+  `lastModifiedAt` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `oauth_client_details` (
+  `client_id` varchar(128) NOT NULL,
+  `resource_ids` varchar(256) DEFAULT NULL,
+  `client_secret` varchar(256) DEFAULT NULL,
+  `scope` varchar(256) DEFAULT NULL,
+  `authorized_grant_types` varchar(256) DEFAULT NULL,
+  `web_server_redirect_uri` varchar(256) DEFAULT NULL,
+  `authorities` varchar(256) DEFAULT NULL,
+  `access_token_validity` int(11) DEFAULT NULL,
+  `refresh_token_validity` int(11) DEFAULT NULL,
+  `additional_information` varchar(4096) DEFAULT NULL,
+  `autoapprove` varchar(256) DEFAULT NULL,
+  PRIMARY KEY (`client_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `oauth_client_token` (
+  `token_id` varchar(256) DEFAULT NULL,
+  `token` blob,
+  `authentication_id` varchar(128) NOT NULL,
+  `user_name` varchar(256) DEFAULT NULL,
+  `client_id` varchar(256) DEFAULT NULL,
+  PRIMARY KEY (`authentication_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `oauth_code`;
+CREATE TABLE `oauth_code` (
+  `code` varchar(256) DEFAULT NULL,
+  `authentication` blob
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `oauth_refresh_token` (
+  `token_id` varchar(256) DEFAULT NULL,
+  `token` blob,
+  `authentication` blob
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- 为了测试方便先插入一条客户端信息。
+INSERT INTO `oauth_client_details` VALUES ('dev', '', 'dev', 'app', 'password,client_credentials,authorization_code,refresh_token', 'http://www.baidu.com', '', 3600, 3600, '{\"country\":\"CN\",\"country_code\":\"086\"}', 'false');
+
+-- 用户、权限、角色用到的表如下:
+DROP TABLE IF EXISTS `user`;
+DROP TABLE IF EXISTS `role`;
+DROP TABLE IF EXISTS `user_role`;
+DROP TABLE IF EXISTS `role_permission`;
+DROP TABLE IF EXISTS `permission`;
+
+CREATE TABLE `user` (
+`id` bigint(11) NOT NULL AUTO_INCREMENT,
+`username` varchar(255) NOT NULL,
+`password` varchar(255) NOT NULL,
+PRIMARY KEY (`id`) 
+);
+CREATE TABLE `role` (
+`id` bigint(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+PRIMARY KEY (`id`) 
+);
+CREATE TABLE `user_role` (
+`user_id` bigint(11) NOT NULL,
+`role_id` bigint(11) NOT NULL
+);
+CREATE TABLE `role_permission` (
+`role_id` bigint(11) NOT NULL,
+`permission_id` bigint(11) NOT NULL
+);
+CREATE TABLE `permission` (
+`id` bigint(11) NOT NULL AUTO_INCREMENT,
+`url` varchar(255) NOT NULL,
+`name` varchar(255) NOT NULL,
+`description` varchar(255) NULL,
+`pid` bigint(11) NOT NULL,
+PRIMARY KEY (`id`) 
+);
+
+INSERT INTO user (id, username, password) VALUES (1,'user','e10adc3949ba59abbe56e057f20f883e'); 
+INSERT INTO user (id, username , password) VALUES (2,'admin','e10adc3949ba59abbe56e057f20f883e'); 
+INSERT INTO role (id, name) VALUES (1,'USER');
+INSERT INTO role (id, name) VALUES (2,'ADMIN');
+INSERT INTO permission (id, url, name, pid) VALUES (1,'/**','',0);
+INSERT INTO permission (id, url, name, pid) VALUES (2,'/**','',0);
+INSERT INTO user_role (user_id, role_id) VALUES (1, 1);
+INSERT INTO user_role (user_id, role_id) VALUES (2, 2);
+INSERT INTO role_permission (role_id, permission_id) VALUES (1, 1);
+INSERT INTO role_permission (role_id, permission_id) VALUES (2, 2);
+```
+
+
+
+#### 第一步：添加依赖
+
+```xml
+<!-- springSecurity-->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+<!-- Oauth2-->
+<dependency>
+    <groupId>org.springframework.security.oauth</groupId>
+    <artifactId>spring-security-oauth2</artifactId>
+    <version>2.5.0.RELEASE</version>
+</dependency>
+```
+
+#### 第二步：添加认证服务端配置
+
+```java
+package org.example.config.oauth2;
+
+import org.example.config.exception.CustomWebResponseExceptionTranslator;
+import org.example.service.impl.UserServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+
+import javax.sql.DataSource;
+/**
+ * 认证服务端配置
+ * @Author silentiger@yyh
+ * @Date 2023-12-17 14:10:01
+ */
+@Configuration
+@EnableAuthorizationServer
+public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
+    /**
+     * 注入权限验证控制器 来支持 password grant type
+     */
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private CustomWebResponseExceptionTranslator webResponseExceptionTranslator;
+
+    /**
+     * 注入userDetailsService，开启refresh_token需要用到
+     */
+    @Autowired
+    UserServiceImpl userDetailService;
+    /**
+     * 设置保存token的方式，一共有五种，这里采用数据库的方式
+     */
+    @Autowired
+    private TokenStore tokenStore;
+    /**
+     * 数据源
+     */
+    @Autowired
+    private DataSource dataSource;
+    @Override
+    public void configure(AuthorizationServerSecurityConfigurer security) {
+        security.tokenKeyAccess("permitAll()")
+                .checkTokenAccess("permitAll()")
+                .allowFormAuthenticationForClients();
+    }
+    @Override
+    public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+        clients.jdbc(dataSource);
+    }
+    @Override
+    public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
+        //开启密码授权类型
+        endpoints.authenticationManager(authenticationManager);
+        //配置token存储方式
+        endpoints.tokenStore(tokenStore);
+        //自定义登录或者鉴权失败时的返回信息
+        endpoints.exceptionTranslator(webResponseExceptionTranslator);
+        //要使用refresh_token的话，需要额外配置userDetailsService
+        endpoints.userDetailsService(userDetailService);
+    }
+}
+```
+
+#### 第三步：资源服务器配置
+
+```java
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+/**
+ * 资源服务器配置
+ *
+ * @Author silentiger@yyh
+ * @Date 2023-12-17 14:14:58
+ */
+@Configuration
+@EnableResourceServer
+public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
+    /**
+     * 这里设置需要token验证的url
+     * 可以在WebSecurityConfigurerAdapter中排除掉，
+     * 对于相同的url，如果二者都配置了验证
+     * 则优先进入ResourceServerConfigurerAdapter,进行token验证。而不会进行
+     * WebSecurityConfigurerAdapter 的 basic auth或表单认证。
+     */
+    @Override
+    public void configure(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity.requestMatchers()
+                .antMatchers("/no")
+//                .antMatchers("/**")
+                .and()
+                .authorizeRequests()
+                .antMatchers("/no")
+//                .antMatchers("/**")
+                .authenticated();
+    }
+}
+```
+
+#### 第四步：SpringSecurity配置
+
+```java
+import org.example.config.exception.CustomWebResponseExceptionTranslator;
+import org.example.service.impl.UserServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.DigestUtils;
+
+import java.util.Objects;
+
+/**
+ * SpringSecurity配置文件,支持password模式要配置AuthenticationManager
+ * @Author silentiger@yyh
+ * @Date 2023-12-17 13:52:58
+ */
+
+@Configuration
+@EnableWebSecurity
+//@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private UserServiceImpl userDetailService;
+
+    @Autowired
+    private CustomWebResponseExceptionTranslator customWebResponseExceptionTranslator;
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        //校验用户
+        auth.userDetailsService(userDetailService)
+            .passwordEncoder( new PasswordEncoder() {
+                //对密码进行加密
+                @Override
+                public String encode(CharSequence charSequence) {
+//                    System.out.println(charSequence.toString());
+                    return DigestUtils.md5DigestAsHex(charSequence.toString().getBytes());
+                }
+                //对密码进行判断匹配
+                @Override
+                public boolean matches(CharSequence charSequence, String s) {
+                    String encode = DigestUtils.md5DigestAsHex(charSequence.toString().getBytes());
+                    return s.equals(encode);
+                }
+            }
+        );
+    }
+    /**
+     * anyRequest          |   匹配所有请求路径
+     * access              |   SpringEl表达式结果为true时可以访问
+     * anonymous           |   匿名可以访问
+     * denyAll             |   用户不能访问
+     * fullyAuthenticated  |   用户完全认证可以访问（非remember-me下自动登录）
+     * hasAnyAuthority     |   如果有参数，参数表示权限，则其中任何一个权限可以访问
+     * hasAnyRole          |   如果有参数，参数表示角色，则其中任何一个角色可以访问
+     * hasAuthority        |   如果有参数，参数表示权限，则其权限可以访问
+     * hasIpAddress        |   如果有参数，参数表示IP地址，如果用户IP和参数匹配，则可以访问
+     * hasRole             |   如果有参数，参数表示角色，则其角色可以访问
+     * permitAll           |   用户可以任意访问
+     * rememberMe          |   允许通过remember-me登录的用户访问
+     * authenticated       |   用户登录后可访问
+     */
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+//        http.csrf().disable()
+//            .requestMatchers()
+//            .antMatchers("/oauth/**","/user/login")
+//            .and()
+//            .authorizeRequests()
+//            .antMatchers("/oauth/**").authenticated()
+//            .and()
+//            .formLogin().loginPage( "/login" );
+        http
+            // CRSF禁用，因为不使用session
+            .csrf().disable()
+            // 认证失败处理类
+//            .exceptionHandling().authenticationEntryPoint(customWebResponseExceptionTranslator).and()
+            // 基于token，所以不需要session
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+            // 过滤请求
+            .authorizeRequests()
+            // 对于登录login 验证码captchaImage 允许匿名访问
+            .antMatchers("/**/login", "/captchaImage").permitAll()
+            .antMatchers(
+                    HttpMethod.GET,
+                    "/*.html",
+                    "/**/*.html",
+                    "/**/*.css",
+                    "/**/*.js"
+            ).permitAll()
+//            .antMatchers("/profile/**").anonymous()
+//            .antMatchers("/common/download**").anonymous()
+//            .antMatchers("/common/download/resource**").anonymous()
+//            .antMatchers("/swagger-ui.html").anonymous()
+            .antMatchers("/swagger-resources/**").anonymous()
+//            .antMatchers("/webjars/**").anonymous()
+            .antMatchers("/*/api-docs").anonymous()
+//            .antMatchers("/druid/**").anonymous()
+            //Demo目录下的请求不需要鉴权认证
+            .antMatchers("/demo/**").anonymous()
+            // 除上面外的所有请求全部需要鉴权认证
+            .anyRequest().authenticated()
+            .and()
+            .headers().frameOptions().disable();
+    }
+    @Override
+    @Bean
+    public AuthenticationManager authenticationManagerBean() throws Exception{
+        return super.authenticationManager();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new PasswordEncoder() {
+            @Override
+            public String encode(CharSequence charSequence) {
+                return charSequence.toString();
+            }
+
+            @Override
+            public boolean matches(CharSequence charSequence, String s) {
+                return Objects.equals(charSequence.toString(),s);
+            }
+        };
+    }
+}
+```
+
+#### 第五步：还需要UserDetailSerivce
+
+```java
+@Service
+public class UserServiceImpl UserDetailsService {
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private RoleMapper roleMapper;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        //查数据库
+        User user = userMapper.loadUserByUsername( username );
+        if (null != user) {
+            List<Role> roles = roleMapper.getRolesByUserId( user.getId() );
+            user.setAuthorities( roles );
+        }
+        return user;
+    }
+}
+```
+
+#### 第六步：其他，entity和mapper、异常类、token存储方式bean
+
+```java
+// entity
+@Data
+public class Role  implements GrantedAuthority {
+
+    private Long id;
+    private String name;
+
+    @Override
+    public String getAuthority() {
+        return name;
+    }
+}
+@Data
+public class RolePermission {
+
+    private String url;
+    private String roleName;
+
+}
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class User implements UserDetails, Serializable {
+
+    private Long id;
+    private String username;
+    private String password;
+    private List<Role> authorities;
+
+    /**
+     * 用户账号是否过期
+     */
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    /**
+     * 用户账号是否被锁定
+     */
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    /**
+     * 用户密码是否过期
+     */
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    /**
+     * 用户是否可用
+     */
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+}
+// mapper
+@Mapper
+public interface PermissionMapper extends BaseMapper<RolePermission> {
+
+    @Select( "SELECT A.NAME AS roleName,C.url FROM role AS A LEFT JOIN role_permission B ON A.id=B.role_id LEFT JOIN permission AS C ON B.permission_id=C.id" )
+    List<RolePermission> getRolePermissions();
+
+}
+
+@Mapper
+public interface RoleMapper extends BaseMapper<Role> {
+
+    @Select( "SELECT A.id,A.name FROM role A LEFT JOIN user_role B ON A.id=B.role_id WHERE B.user_id=${userId}" )
+    List<Role> getRolesByUserId(@Param("userId") Long userId);
+
+}
+
+@Mapper
+public interface UserMapper extends BaseMapper<User> {
+
+    @Select( "select id , username , password from user where username = #{username}" )
+    User loadUserByUsername(@Param("username") String username);
+
+}
+//  异常类
+@Component
+public class CustomWebResponseExceptionTranslator implements WebResponseExceptionTranslator {
+    @Override
+    public ResponseEntity translate(Exception e) {
+
+//        InternalAuthenticationServiceException oAuth2Exception = (InternalAuthenticationServiceException) e;
+        return ResponseEntity
+                .status(200)
+                .body(e.getMessage());
+//                .body(new InternalAuthenticationServiceException(oAuth2Exception.getMessage()));
+    }
+}
+
+// token存储方式bean
+@Configuration
+public class Beans {
+    /**
+     * 数据源
+     */
+    @Autowired
+    private DataSource dataSource;
+
+    @Bean
+    public TokenStore tokenStore() {
+        return new JdbcTokenStore( dataSource );
+    }
+}
+
+```
+
+#### 第七步：测试
+
+1. 密码模式
+
+   http://127.0.0.1:8070/oauth/token?username=admin&password=123456&grant_type=password&client_id=dev&client_secret=dev
+
+   ![image-20231217221626702](images/image-20231217221626702.png)
+
+2. 客户端模式
+
+   http://127.0.0.1:8070/oauth/token?grant_type=client_credentials&client_id=dev&client_secret=dev
+
+   ![image-20231217221543780](images/image-20231217221543780.png)
+
+3. 授权码模式
+
+4. 简化模式
 

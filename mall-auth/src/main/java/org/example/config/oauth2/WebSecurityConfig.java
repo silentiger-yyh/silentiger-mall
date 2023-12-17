@@ -71,14 +71,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-//        http.csrf().disable()
-//            .requestMatchers()
-//            .antMatchers("/oauth/**","/user/login")
-//            .and()
-//            .authorizeRequests()
-//            .antMatchers("/oauth/**").authenticated()
-//            .and()
-//            .formLogin().loginPage( "/login" );
         http
             // CRSF禁用，因为不使用session
             .csrf().disable()
@@ -89,7 +81,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             // 过滤请求
             .authorizeRequests()
             // 对于登录login 验证码captchaImage 允许匿名访问
-            .antMatchers("/**/login", "/captchaImage").permitAll()
+            .antMatchers("/**/login", "/captchaImage", "/oauth/**").permitAll()
             .antMatchers(
                     HttpMethod.GET,
                     "/*.html",
@@ -110,7 +102,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             // 除上面外的所有请求全部需要鉴权认证
             .anyRequest().authenticated()
             .and()
-            .headers().frameOptions().disable();
+            .headers().frameOptions().disable()
+            .and()
+            .formLogin();   // 使用默认的登录页人，如果要使用自定义的登录页在后面添加.loginPage( "/login" )
     }
 
 

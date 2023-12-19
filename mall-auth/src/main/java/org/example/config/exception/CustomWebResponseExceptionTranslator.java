@@ -13,15 +13,15 @@ import org.springframework.stereotype.Component;
  * @Date 2023-12-17 15:40:00
  */
 
-@Component
-public class CustomWebResponseExceptionTranslator implements WebResponseExceptionTranslator {
-    @Override
-    public ResponseEntity translate(Exception e) {
-
-//        InternalAuthenticationServiceException oAuth2Exception = (InternalAuthenticationServiceException) e;
-        return ResponseEntity
-                .status(200)
-                .body(e.getMessage());
-//                .body(new InternalAuthenticationServiceException(oAuth2Exception.getMessage()));
-    }
-}
+//@Component
+//public class CustomWebResponseExceptionTranslator implements WebResponseExceptionTranslator {
+//    @Override
+//    public ResponseEntity translate(Exception e) {
+//
+////        InternalAuthenticationServiceException oAuth2Exception = (InternalAuthenticationServiceException) e;
+//        return ResponseEntity
+//                .status(200)
+//                .body(e.getMessage());
+////                .body(new InternalAuthenticationServiceException(oAuth2Exception.getMessage()));
+//    }
+//}

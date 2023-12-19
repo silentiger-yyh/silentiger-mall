@@ -1,4 +1,4 @@
-package org.silentiger.utils;
+package org.silentiger.util;
 
 import java.util.Date;
 

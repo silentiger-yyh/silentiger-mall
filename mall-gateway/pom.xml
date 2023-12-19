@@ -16,20 +16,11 @@
     </properties>
 
     <dependencies>
-        <!-- sentinel 熔断 -->
-<!--        <dependency>-->
-<!--            <groupId>com.alibaba.cloud</groupId>-->
-<!--            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>-->
-<!--        </dependency>-->
         <!-- gateway 路由网关 -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.alibaba.cloud</groupId>-->
-<!--            <artifactId>spring-cloud-alibaba-sentinel-gateway</artifactId>-->
-<!--        </dependency>-->
         <!-- 整合nacos需要添加负载均衡依赖,否则在通过网关请求接口时会报错503 -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

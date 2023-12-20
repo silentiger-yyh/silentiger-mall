@@ -70,7 +70,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .authorizedGrantTypes("password", "refresh_token")
                 .accessTokenValiditySeconds(3600*24)
                 .refreshTokenValiditySeconds(3600*24*7)
-                .redirectUris("https://baidu.com", "https://baidu.com2")
+//                .redirectUris("https://baidu.com", "https://baidu.com2")
                 .and()
                 .withClient("silentiger-mall-admin-client")
                 .authorizedGrantTypes("password", "refresh_token", "authorization_code", "client_credentials", "implicit")

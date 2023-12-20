@@ -35,6 +35,7 @@
     <knife4j-gateway-spring-boot-starter.version>4.3.0</knife4j-gateway-spring-boot-starter.version>
     <spring-security-oauth2.version>2.5.2.RELEASE</spring-security-oauth2.version>
     <spring-security-oauth2-autoconfigure.version>2.6.8</spring-security-oauth2-autoconfigure.version>
+    <nimbus-jose-jwt.version>9.23</nimbus-jose-jwt.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
@@ -44,6 +45,11 @@
   这里是所有springboot子模块公共依赖
   -->
   <dependencies>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.30</version>
+    </dependency>
     <!-- test -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -90,9 +96,9 @@
       <version>1.2.66</version>
     </dependency>
     <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.18.16</version>
+      <groupId>cn.hutool</groupId>
+      <artifactId>hutool-all</artifactId>
+      <version>5.8.0</version>
     </dependency>
 
   </dependencies>
@@ -185,6 +191,11 @@
         <groupId>org.springframework.security.oauth.boot</groupId>
         <artifactId>spring-security-oauth2-autoconfigure</artifactId>
         <version>${spring-security-oauth2-autoconfigure.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.nimbusds</groupId>
+        <artifactId>nimbus-jose-jwt</artifactId>
+        <version>${nimbus-jose-jwt.version}</version>
       </dependency>
       <dependency>
         <groupId>com.alibaba</groupId>

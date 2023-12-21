@@ -194,7 +194,7 @@
 
    完整工程目录和pom依赖如下
 
-   ![image-20231215201407836](images/image-20231215201407836.png)
+   ![image-20231215201407836](docs/images/image-20231215201407836.png)
 
    ```xml
    <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -268,15 +268,15 @@
 
    命名空间可以用于区分不同的系统、环境（dev、uat、prod）等，名称和描述自定义即可
 
-   ![image-20231215202304891](images/image-20231215202304891.png)
+   ![image-20231215202304891](docs/images/image-20231215202304891.png)
 
 5. 在nacos配置中心->配置管理->配置列表中创建yaml配置文件
 
    先选择刚才创建的命名空间，然后创建配置
 
-   ![image-20231215202520440](images/image-20231215202520440.png)
+   ![image-20231215202520440](docs/images/image-20231215202520440.png)
 
-   ![image-20231215202636792](images/image-20231215202636792.png)
+   ![image-20231215202636792](docs/images/image-20231215202636792.png)
 
    **注意，这里的DataID是和服务名称挂钩的，比如服务名称拟定为mall-cloud-demo，则这里的DataID可起为mall-cloud-demo、mall-cloud-demo.yaml、mall-cloud-demo-dev.yaml，当然，这里的dev也是需要和bootstrap中配置的匹配，nacos才能正确读取到配置信息**
 
@@ -328,9 +328,9 @@
 
 7. 启动demo
 
-   ![image-20231215203335396](images/image-20231215203335396.png)
+   ![image-20231215203335396](docs/images/image-20231215203335396.png)
 
-   ![image-20231215203355746](images/image-20231215203355746.png)
+   ![image-20231215203355746](docs/images/image-20231215203355746.png)
 
 ### 网关gateway
 
@@ -491,7 +491,7 @@ knife4j:
         group-name: default  # 注意这里一定要是default分组
         api-rule: package
         api-rule-resources:
-          - org.example.controller
+          - org.gateway.controller
 ```
 
 **注意：**对于分组名称，必须是**default**，因为在后续的gateway聚合方式中，采用的是discovery，也就是服务发现的方式，官方也说明了这种方式的分组名称必须是default
@@ -513,7 +513,7 @@ public class DemoController {
 
 访问 http://localhost:8080/doc.html（注意：这里访问的是demo服务，不是网关）
 
-![image-20231216153736618](images/image-20231216153736618.png)
+![image-20231216153736618](docs/images/image-20231216153736618.png)
 
 #### 第四步（聚合1）：在gateway网关pom中添加依赖
 
@@ -573,7 +573,7 @@ spring:
 
 在访问gateway的接口文档中心的时候，会先调用/swagger-resources获取资源信息，也就是左上角的下拉菜单选项。
 
-![image-20231216160101474](images/image-20231216160101474.png)
+![image-20231216160101474](docs/images/image-20231216160101474.png)
 
 1. 先创建一个`Knife4jResourceProvider`
 
@@ -644,7 +644,7 @@ spring:
 
    ```java
    import lombok.RequiredArgsConstructor;
-   import org.example.config.Knife4jResourceProvider;
+   import org.gateway.config.knife4j.Knife4jResourceProvider;
    import org.springframework.http.HttpStatus;
    import org.springframework.http.ResponseEntity;
    import org.springframework.web.bind.annotation.RequestMapping;
@@ -846,10 +846,10 @@ INSERT INTO role_permission (role_id, permission_id) VALUES (2, 2);
 #### 第二步：添加认证服务端配置
 
 ```java
-package org.example.config.oauth2;
+package org.gateway.config.oauth2;
 
-import org.example.config.exception.CustomWebResponseExceptionTranslator;
-import org.example.service.impl.UserServiceImpl;
+import org.gateway.config.exception.CustomWebResponseExceptionTranslator;
+import org.gateway.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -861,6 +861,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
 import javax.sql.DataSource;
+
 /**
  * 认证服务端配置
  * @Author silentiger@yyh
@@ -892,16 +893,19 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
      */
     @Autowired
     private DataSource dataSource;
+
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) {
         security.tokenKeyAccess("permitAll()")
                 .checkTokenAccess("permitAll()")
                 .allowFormAuthenticationForClients();
     }
+
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients.jdbc(dataSource);
     }
+
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
         //开启密码授权类型
@@ -956,8 +960,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 #### 第四步：SpringSecurity配置
 
 ```java
-import org.example.config.exception.CustomWebResponseExceptionTranslator;
-import org.example.service.impl.UserServiceImpl;
+import org.gateway.config.exception.CustomWebResponseExceptionTranslator;
+import org.gateway.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -994,22 +998,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         //校验用户
         auth.userDetailsService(userDetailService)
-            .passwordEncoder( new PasswordEncoder() {
-                //对密码进行加密
-                @Override
-                public String encode(CharSequence charSequence) {
+                .passwordEncoder(new PasswordEncoder() {
+                                     //对密码进行加密
+                                     @Override
+                                     public String encode(CharSequence charSequence) {
 //                    System.out.println(charSequence.toString());
-                    return DigestUtils.md5DigestAsHex(charSequence.toString().getBytes());
-                }
-                //对密码进行判断匹配
-                @Override
-                public boolean matches(CharSequence charSequence, String s) {
-                    String encode = DigestUtils.md5DigestAsHex(charSequence.toString().getBytes());
-                    return s.equals(encode);
-                }
-            }
-        );
+                                         return DigestUtils.md5DigestAsHex(charSequence.toString().getBytes());
+                                     }
+
+                                     //对密码进行判断匹配
+                                     @Override
+                                     public boolean matches(CharSequence charSequence, String s) {
+                                         String encode = DigestUtils.md5DigestAsHex(charSequence.toString().getBytes());
+                                         return s.equals(encode);
+                                     }
+                                 }
+                );
     }
+
     /**
      * anyRequest          |   匹配所有请求路径
      * access              |   SpringEl表达式结果为true时可以访问
@@ -1036,41 +1042,42 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //            .and()
 //            .formLogin().loginPage( "/login" );
         http
-            // CRSF禁用，因为不使用session
-            .csrf().disable()
-            // 认证失败处理类
+                // CRSF禁用，因为不使用session
+                .csrf().disable()
+                // 认证失败处理类
 //            .exceptionHandling().authenticationEntryPoint(customWebResponseExceptionTranslator).and()
-            // 基于token，所以不需要session
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-            // 过滤请求
-            .authorizeRequests()
-            // 对于登录login 验证码captchaImage 允许匿名访问
-            .antMatchers("/**/login", "/captchaImage").permitAll()
-            .antMatchers(
-                    HttpMethod.GET,
-                    "/*.html",
-                    "/**/*.html",
-                    "/**/*.css",
-                    "/**/*.js"
-            ).permitAll()
+                // 基于token，所以不需要session
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+                // 过滤请求
+                .authorizeRequests()
+                // 对于登录login 验证码captchaImage 允许匿名访问
+                .antMatchers("/**/login", "/captchaImage").permitAll()
+                .antMatchers(
+                        HttpMethod.GET,
+                        "/*.html",
+                        "/**/*.html",
+                        "/**/*.css",
+                        "/**/*.js"
+                ).permitAll()
 //            .antMatchers("/profile/**").anonymous()
 //            .antMatchers("/common/download**").anonymous()
 //            .antMatchers("/common/download/resource**").anonymous()
 //            .antMatchers("/swagger-ui.html").anonymous()
-            .antMatchers("/swagger-resources/**").anonymous()
+                .antMatchers("/swagger-resources/**").anonymous()
 //            .antMatchers("/webjars/**").anonymous()
-            .antMatchers("/*/api-docs").anonymous()
+                .antMatchers("/*/api-docs").anonymous()
 //            .antMatchers("/druid/**").anonymous()
-            //Demo目录下的请求不需要鉴权认证
-            .antMatchers("/demo/**").anonymous()
-            // 除上面外的所有请求全部需要鉴权认证
-            .anyRequest().authenticated()
-            .and()
-            .headers().frameOptions().disable();
+                //Demo目录下的请求不需要鉴权认证
+                .antMatchers("/demo/**").anonymous()
+                // 除上面外的所有请求全部需要鉴权认证
+                .anyRequest().authenticated()
+                .and()
+                .headers().frameOptions().disable();
     }
+
     @Override
     @Bean
-    public AuthenticationManager authenticationManagerBean() throws Exception{
+    public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManager();
     }
 
@@ -1084,7 +1091,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
             @Override
             public boolean matches(CharSequence charSequence, String s) {
-                return Objects.equals(charSequence.toString(),s);
+                return Objects.equals(charSequence.toString(), s);
             }
         };
     }
@@ -1240,13 +1247,13 @@ public class Beans {
 
    http://127.0.0.1:8070/oauth/token?username=admin&password=123456&grant_type=password&client_id=dev&client_secret=dev
 
-   ![image-20231217221626702](images/image-20231217221626702.png)
+   ![image-20231217221626702](docs/images/image-20231217221626702.png)
 
 2. 客户端模式
 
    http://127.0.0.1:8070/oauth/token?grant_type=client_credentials&client_id=dev&client_secret=dev
 
-   ![image-20231217221543780](images/image-20231217221543780.png)
+   ![image-20231217221543780](docs/images/image-20231217221543780.png)
 
 3. 授权码模式
 

@@ -1,10 +1,12 @@
 package org.silentiger.config;
 
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import org.silentiger.service.RedisService;
+import org.silentiger.service.impl.RedisServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -20,9 +22,12 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.Duration;
 
 /**
- * Redis基础配置
- * Created by macro on 2020/6/19.
+ * 项目全局Redis配置
+ *
+ * @Author silentiger@yyh
+ * @Date 2023-12-20 19:35:37
  */
+
 @Configuration
 public class BaseRedisConfig {
 
@@ -61,9 +66,9 @@ public class BaseRedisConfig {
     }
 
 
-//    @Bean
-//    public RedisService redisService(){
-//        return new RedisServiceImpl();
-//    }
+    @Bean
+    public RedisService redisService(){
+        return new RedisServiceImpl();
+    }
 
 }

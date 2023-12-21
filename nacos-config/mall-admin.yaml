@@ -27,4 +27,4 @@ knife4j:
         group-name: default
         api-rule: package
         api-rule-resources:
-          - org.example.controller
+          - org.admin.controller

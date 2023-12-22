@@ -1,10 +1,21 @@
 package org.auth.config.bean;
 
 import org.silentiger.constant.SecretKeyConstant;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.support.collections.RedisCollectionFactoryBean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
+
+import javax.sql.DataSource;
 
 /**
  * 注入Bean
@@ -16,15 +27,18 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 @Configuration
 public class Beans {
 
+    @Autowired
+    private RedisConnectionFactory redisConnectionFactory;
     /**
      * 生成TokenStore来保存token  此处为JwtTokenStore实现
      * @return TokenStore
      */
     @Bean
-    public JwtTokenStore jwtTokenStore() {
+    public TokenStore tokenStore() {
 //        return new InMemoryTokenStore();
 //        return new JdbcTokenStore( dataSource );
-        return new JwtTokenStore(jwtAccessTokenConverter());
+        return new RedisTokenStore(redisConnectionFactory);
+//        return new JwtTokenStore(jwtAccessTokenConverter());
     }
     /**
      *  生成JwtAccessTokenConverter转换器，并设置密钥
@@ -46,6 +60,28 @@ public class Beans {
     @Bean
     public JwtTokenEnhancer jwtTokenEnhancer() {
         return new JwtTokenEnhancer();
+    }
+
+    /**
+     * 设置加密方式
+     * @return
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+//        return NoOpPasswordEncoder.getInstance();
+        return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * 配置clientDetail的存储方式
+     * @param dataSource
+     * @return
+     */
+    @Bean("jdbcClientDetailsService")
+    public ClientDetailsService clientDetailsService(DataSource dataSource) {
+        JdbcClientDetailsService clientDetailsService = new JdbcClientDetailsService(dataSource);
+        clientDetailsService.setPasswordEncoder(passwordEncoder());
+        return clientDetailsService;
     }
 
 //    @Bean

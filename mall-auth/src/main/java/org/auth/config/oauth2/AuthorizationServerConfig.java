@@ -1,5 +1,6 @@
 package org.auth.config.oauth2;
 
+import jdk.nashorn.internal.parser.TokenStream;
 import org.auth.service.impl.UserDetailsServiceImpl;
 import org.auth.config.bean.JwtTokenEnhancer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +13,14 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
+import javax.sql.DataSource;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -44,7 +48,8 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Autowired
     private JwtTokenEnhancer jwtTokenEnhancer;
     @Autowired
-    private JwtTokenStore jwtTokenStore;
+    @Qualifier(value = "tokenStore")
+    private TokenStore tokenStore;
     /**
      * 注入userDetailsService，开启refresh_token需要用到
      */
@@ -54,6 +59,13 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Autowired
     @Qualifier(value = "passwordEncoder")
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    @Qualifier(value = "jdbcClientDetailsService")
+    private ClientDetailsService clientDetailsService;
+
+    @Autowired
+    private DataSource dataSource;
     /**
      * 单点登录配置
      * @param security
@@ -64,34 +76,41 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         security.tokenKeyAccess("isAuthenticated()");
     }
 
+    /**
+     * 配置客户端，下面三种配置方式均可，imMemory不适合用在生产环境，
+     * 数据库方式对应项目配置的数据源，表名为oauth_client_details，目前无法修改表名
+     * @param clients the client details configurer
+     * @throws Exception
+     */
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-//        clients.jdbc(dataSource);
-        clients.inMemory()
-                .withClient("silentiger-mall-portal-client")
-                .authorizedGrantTypes("password", "refresh_token", "authorization_code", "client_credentials", "implicit")
-                .scopes("all")
-                /**
-                 * 客户端密钥
-                 * clientid是客户端标识，secret是客户端身份凭据，客户端通过提供凭据来证明自己的身份，以便获取访问令牌，从而访问受保护的资源。
-                 * 服务端通过clientid知道可能是你，但是服务端不信任你，你就得拿出证据，服务端才会给你颁发token。
-                 * 并且这个密钥只会存在于服务端，或者数据库，前端是通过clientId+secret组合编码，放到请求头Authorization中的
-                 * 见下面的main方法
-                 */
-                .secret(passwordEncoder.encode("silentiger"))
-//                .secret("{noop}secret")
-                .accessTokenValiditySeconds(3600*24)
-                .refreshTokenValiditySeconds(3600*24*7)
-                // 如果要跳转的话需要加上，否则会404，但是这种写在代码里的方式肯定不实用，后期再整改
-//                .redirectUris("https://baidu.com", "https://baidu.com2")
-                .and()
-                .withClient("silentiger-mall-admin-client")
-                .authorizedGrantTypes("password", "refresh_token", "authorization_code", "client_credentials", "implicit")
-                .scopes("all")
-                .secret(passwordEncoder.encode("secret"))
-                .accessTokenValiditySeconds(60 * 30)
-                .refreshTokenValiditySeconds(60 * 30)
-//                .redirectUris("https://baidu.com", "https://baidu.com2")
+//        clients.withClientDetails(clientDetailsService);
+        clients.jdbc(dataSource);
+//        clients.inMemory()
+//                .withClient("silentiger-mall-portal-client")
+//                .authorizedGrantTypes("password", "refresh_token", "authorization_code", "client_credentials", "implicit")
+//                .scopes("all")
+//                /**
+//                 * 客户端密钥
+//                 * clientid是客户端标识，secret是客户端身份凭据，客户端通过提供凭据来证明自己的身份，以便获取访问令牌，从而访问受保护的资源。
+//                 * 服务端通过clientid知道可能是你，但是服务端不信任你，你就得拿出证据，服务端才会给你颁发token。
+//                 * 并且这个密钥只会存在于服务端，或者数据库，前端是通过clientId+secret组合编码，放到请求头Authorization中的
+//                 * 见下面的main方法
+//                 */
+//                .secret(passwordEncoder.encode("silentiger"))
+////                .secret("{noop}secret")
+//                .accessTokenValiditySeconds(3600*24)
+//                .refreshTokenValiditySeconds(3600*24*7)
+//                // 如果要跳转的话需要加上，否则会404，但是这种写在代码里的方式肯定不实用，后期再整改
+////                .redirectUris("https://baidu.com", "https://baidu.com2")
+//                .and()
+//                .withClient("silentiger-mall-admin-client")
+//                .authorizedGrantTypes("password", "refresh_token", "authorization_code", "client_credentials", "implicit")
+//                .scopes("all")
+//                .secret(passwordEncoder.encode("secret"))
+//                .accessTokenValiditySeconds(60 * 30)
+//                .refreshTokenValiditySeconds(60 * 30)
+////                .redirectUris("https://baidu.com", "https://baidu.com2")
         ;
     }
 
@@ -104,7 +123,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         chain.setTokenEnhancers(delegates);
         endpoints
 //              //配置token存储方式
-                .tokenStore(jwtTokenStore)
+                .tokenStore(tokenStore)
 //                .approvalStoreDisabled()
 //                .userApprovalHandler(userApprovalHandler)
                 //开启密码授权类型

@@ -34,6 +34,7 @@ package org.auth.config.oauth2;
 
 import org.auth.service.impl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -57,6 +58,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
+    @Autowired
+    @Qualifier("passwordEncoder")
+    private PasswordEncoder passwordEncoder;
     /**
      * anyRequest          |   匹配所有请求路径
      * access              |   SpringEl表达式结果为true时可以访问
@@ -110,15 +114,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
-    /**
-     * 设置加密方式
-     * @return
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-//        return NoOpPasswordEncoder.getInstance();
-        return new BCryptPasswordEncoder();
-    }
 
     /**
      * 前端传递密码时采用明文传输，这里配置将密码进行加密，与数据库中的密码对比
@@ -128,12 +123,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
     }
 //    public static void main(String[] args) {
 //        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 //        // 加密
-//        String encodedPassword = passwordEncoder.encode("123456");
+//        String encodedPassword = passwordEncoder.encode("silentiger");
+////        String encodedPassword = passwordEncoder.encode("123456");
 //        System.out.println(encodedPassword);
 //    }
 }

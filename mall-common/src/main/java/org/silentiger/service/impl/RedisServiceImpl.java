@@ -3,6 +3,7 @@ package org.silentiger.service.impl;
 import org.silentiger.service.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.concurrent.TimeUnit;
  * @Date 2023-12-20 19:35:37
  */
 
+@Service
 public class RedisServiceImpl implements RedisService {
     @Resource
 //    @Autowired

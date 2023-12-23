@@ -1,10 +1,12 @@
 package org.auth.config.bean;
 
+import org.auth.config.strategy.redistokenstore.FastjsonRedisTokenStoreSerializationStrategy;
 import org.silentiger.constant.SecretKeyConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.data.redis.support.collections.RedisCollectionFactoryBean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,7 +39,9 @@ public class Beans {
     public TokenStore tokenStore() {
 //        return new InMemoryTokenStore();
 //        return new JdbcTokenStore( dataSource );
-        return new RedisTokenStore(redisConnectionFactory);
+        RedisTokenStore redisTokenStore = new RedisTokenStore(redisConnectionFactory);
+        redisTokenStore.setSerializationStrategy(new FastjsonRedisTokenStoreSerializationStrategy());
+        return redisTokenStore;
 //        return new JwtTokenStore(jwtAccessTokenConverter());
     }
     /**

@@ -13,7 +13,12 @@ public class AuthConstant {
      */
     public static final String JWT_HEADER = "ACCESS-TOKEN";
     /**
-     * clientid加密字段
+     * header中clientid:密钥 加密字段
      */
     public static final String AUTHORIZATION = "Authorization";
+
+    /**
+     * access_token存储在redis中的key前缀，key为access:jwt
+     */
+    public static final String REDIS_KEY_ACCESS_TOKEN = "access:";
 }

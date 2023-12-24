@@ -139,7 +139,8 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
      * client_id+client_secret作为客户端访问授权的凭据
      * 生成的Basic 开头的编码放到请求头的Authorization字段
      */
-    private static final String CLIENT = "silentiger-mall-portal-client:silentiger";
+    private static final String CLIENT = "silentiger-mall-portal-client:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsicmVzMSJdLCJ1c2VyX25hbWUiOiJhZG1pbiIsInNjb3BlIjpbImFsbCJdLCJleHAiOjE3MDM2NDMzNjQsImp0aSI6IkZGWExWRjNlcVlOaUVacEhENjhZbmVWcmNuZyIsImNsaWVudF9pZCI6InNpbGVudGlnZXItbWFsbC1wb3J0YWwtY2xpZW50IiwidXNlcm5hbWUiOiJhZG1pbiJ9.DVnrWrzpk6t6Fy5HB2NqMhlNox01OfGcumJEZki4Jdg";
+//    private static final String CLIENT = "silentiger-mall-portal-client:silentiger";
     public static void main(String[] args) {
         byte[] encode = Base64.getEncoder().encode(CLIENT.getBytes(StandardCharsets.UTF_8));
         System.out.println("Basic " + new String(encode));

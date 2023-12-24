@@ -1,5 +1,6 @@
 package org.auth.service;
 
+import org.auth.entity.UserDetail;
 import org.silentiger.entity.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -12,5 +13,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2023-12-21
  */
 public interface ISysUserService extends IService<SysUser> {
-    SysUser loadUserByUsername(String username);
+    UserDetail loadUserByUsername(String username);
 }

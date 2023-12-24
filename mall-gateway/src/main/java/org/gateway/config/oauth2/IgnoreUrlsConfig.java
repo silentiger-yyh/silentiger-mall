@@ -14,7 +14,7 @@ import java.util.List;
 //@Component
 //@ConfigurationProperties(prefix="secure.ignore")
 public class IgnoreUrlsConfig {
-    private List<String> urls = Arrays.asList(
+    public static String[] urls = new String[]{
             "/doc.html",
             "/swagger-resources/**",
             "/swagger/**",
@@ -23,6 +23,7 @@ public class IgnoreUrlsConfig {
             "/*/*.css",
             "/*/*.png",
             "/*/*.ico",
-            "/mall-auth/oauth/token"
-    );
+            "/mall-auth/oauth/token",
+//            "/mall-cloud-demo/demo/time"
+    };
 }

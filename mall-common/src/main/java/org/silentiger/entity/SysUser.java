@@ -1,16 +1,14 @@
 package org.silentiger.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
-import java.util.Date;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableField;
-import java.io.Serializable;
-import java.util.List;
-
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.springframework.security.core.userdetails.UserDetails;
+
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * <p>
@@ -23,7 +21,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @TableName("sys_user")
-public class SysUser implements Serializable, UserDetails {
+public class SysUser implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -86,39 +84,4 @@ public class SysUser implements Serializable, UserDetails {
      */
     @TableField("last_login_time")
     private Date lastLoginTime;
-
-    private List<SysRole> authorities;
-
-    /**
-     * 用户账号是否过期
-     */
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    /**
-     * 用户账号是否被锁定
-     */
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    /**
-     * 用户密码是否过期
-     */
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    /**
-     * 用户是否可用
-     */
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
 }

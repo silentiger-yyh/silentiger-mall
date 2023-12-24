@@ -3,6 +3,7 @@ package org.auth.mapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.auth.entity.UserDetail;
 import org.silentiger.entity.SysUser;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
@@ -18,5 +19,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 public interface SysUserMapper extends BaseMapper<SysUser> {
 
     @Select("select * from sys_user where username=#{username}")
-    SysUser getUserByUsername(@Param("username") String username);
+    UserDetail getUserByUsername(@Param("username") String username);
 }

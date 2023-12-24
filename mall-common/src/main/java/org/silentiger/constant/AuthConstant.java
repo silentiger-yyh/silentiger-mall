@@ -9,11 +9,11 @@ package org.silentiger.constant;
 
 public class AuthConstant {
     /**
-     * JWT认证信息请求头字段名称
+     * JWT认证信息请求头字段名称（预留）
      */
     public static final String JWT_HEADER = "ACCESS-TOKEN";
     /**
-     * header中clientid:密钥 加密字段
+     * header令牌字段
      */
     public static final String AUTHORIZATION = "Authorization";
 
@@ -21,4 +21,8 @@ public class AuthConstant {
      * access_token存储在redis中的key前缀，key为access:jwt
      */
     public static final String REDIS_KEY_ACCESS_TOKEN = "access:";
+    /**
+     * JWT令牌前缀(TOKEN类型)
+     */
+    public static final String JWT_TOKEN_PREFIX = "Bearer ";
 }

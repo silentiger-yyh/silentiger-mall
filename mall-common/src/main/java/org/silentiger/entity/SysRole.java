@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.springframework.security.core.GrantedAuthority;
 
 /**
  * <p>
@@ -20,7 +19,7 @@ import org.springframework.security.core.GrantedAuthority;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @TableName("sys_role")
-public class SysRole implements Serializable, GrantedAuthority {
+public class SysRole implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -42,9 +41,4 @@ public class SysRole implements Serializable, GrantedAuthority {
     @TableField("description")
     private String description;
 
-
-    @Override
-    public String getAuthority() {
-        return roleName;
-    }
 }

@@ -2,6 +2,8 @@ package org.silentiger.config;
 
 
 import com.alibaba.fastjson.support.spring.GenericFastJsonRedisSerializer;
+import org.silentiger.service.RedisService;
+import org.silentiger.service.impl.RedisServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -15,7 +17,12 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * @Date 2023-12-20 19:35:37
  */
 
-@Configuration
+/**
+ * 没有@Configuration注解的bean,代表不会被CGLIB处理，每次调用bean的方法都会返回一个新的对象
+ * 有@Configuration注解的bean，代表是一个代理对象，@Bean修饰的方法只被调用一次，每次返回都是一个对象
+ */
+
+//@Configuration
 public class BaseRedisConfig {
 
     @Bean
@@ -60,9 +67,9 @@ public class BaseRedisConfig {
 //    }
 
 
-//    @Bean
-//    public RedisService redisService(){
-//        return new RedisServiceImpl();
-//    }
+    @Bean
+    public RedisService redisService(){
+        return new RedisServiceImpl();
+    }
 
 }

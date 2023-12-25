@@ -1,0 +1,8 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    background: #428bca;
+}
+.header a span {
+    color: white
+}

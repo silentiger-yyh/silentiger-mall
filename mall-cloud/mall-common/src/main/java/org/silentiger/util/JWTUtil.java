@@ -5,7 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.apache.commons.lang3.StringUtils;
-import org.silentiger.constant.SecretKeyConstant;
+import org.silentiger.constant.AuthConstant;
 
 import java.util.Map;
 
@@ -38,7 +38,7 @@ public class JWTUtil {
         /**
          * 这里会验证token是否过期，但是不会验证pay中的自定义的一些字段
          */
-        DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC256(SecretKeyConstant.JWT_KEY)).build().verify(jwt);
+        DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC256(AuthConstant.JWT_KEY)).build().verify(jwt);
         // 验证payload中的字段
         String username = decodedJWT.getClaim("username").asString();
         String user_name = decodedJWT.getClaim("user_name").asString();

@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import static org.silentiger.constant.AuthConstant.getOauthTokenAuthorization;
+
 /**
  * 定义一个全局过滤器，用于将用户的信息从token中解析出来放到header中，方便后续的服务直接使用
  *
@@ -26,11 +28,21 @@ public class AuthGlobalFilter implements GlobalFilter {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         ServerHttpResponse response = exchange.getResponse();
+        String path = request.getURI().getPath();
+        // 如果是认证接口，需要添加客户端凭证到请求头
+        if (path.contains("/oauth/token")) {
+            exchange = exchange.mutate().request(
+                    exchange.getRequest()
+                            .mutate()
+                            .header(AuthConstant.AUTHORIZATION, getOauthTokenAuthorization())
+                            .build()
+            ).build();
+            return chain.filter(exchange);
+        }
         // 从请求头中获取jwt
         String jwt = request.getHeaders().getFirst(AuthConstant.AUTHORIZATION);
         if (StringUtils.isBlank(jwt)) {  // null || "" || " "
             response.setStatusCode(HttpStatus.UNAUTHORIZED);
-//            System.out.println("无权访问");
             return response.setComplete();
         }
         // 解析token，将用户信息放到header中

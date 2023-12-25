@@ -16,14 +16,14 @@ import java.util.List;
 public class IgnoreUrlsConfig {
     public static String[] urls = new String[]{
             "/doc.html",
-            "/*/swagger-resources/**",
+            "/swagger-resources/**",
             "/swagger/**",
             "/*/v2/api-docs",
             "/*/*.js",
             "/*/*.css",
             "/*/*.png",
             "/*/*.ico",
-            "/*/oauth/token",
+            "/mall-auth/oauth/token",
 //            "/mall-cloud-demo/demo/time"
     };
 }

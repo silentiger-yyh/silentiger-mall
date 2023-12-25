@@ -13,7 +13,12 @@ import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.web.server.authorization.AuthorizationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 import reactor.core.publisher.Mono;
+
+import java.net.URI;
+import java.util.List;
 
 /**
  * 鉴权管理器自定义
@@ -33,6 +38,14 @@ public class JwtAccessManager implements ReactiveAuthorizationManager<Authorizat
     public Mono<AuthorizationDecision> check(Mono<Authentication> authentication, AuthorizationContext authorizationContext) {
         try {
             ServerHttpRequest request = authorizationContext.getExchange().getRequest();
+            URI uri = request.getURI();
+            PathMatcher pathMatcher = new AntPathMatcher();
+            //白名单路径直接放行
+            for (String ignoreUrl : IgnoreUrlsConfig.urls) {
+                if (pathMatcher.match(ignoreUrl, uri.getPath())) {
+                    return Mono.just(new AuthorizationDecision(true));
+                }
+            }
             String token = request.getHeaders().getFirst(AuthConstant.AUTHORIZATION);
             if (token != null && token.startsWith(AuthConstant.JWT_TOKEN_PREFIX)) {
                 token = token.replace(AuthConstant.JWT_TOKEN_PREFIX, "");

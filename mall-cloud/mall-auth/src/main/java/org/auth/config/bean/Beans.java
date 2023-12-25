@@ -1,20 +1,17 @@
 package org.auth.config.bean;
 
 import org.auth.config.strategy.redistokenstore.FastjsonRedisTokenStoreSerializationStrategy;
-import org.silentiger.constant.SecretKeyConstant;
+import org.silentiger.constant.AuthConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.data.redis.support.collections.RedisCollectionFactoryBean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 
 import javax.sql.DataSource;
@@ -53,7 +50,7 @@ public class Beans {
     public JwtAccessTokenConverter jwtAccessTokenConverter() {
         JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
         // 设置jwt密钥
-        jwtAccessTokenConverter.setSigningKey(SecretKeyConstant.JWT_KEY);
+        jwtAccessTokenConverter.setSigningKey(AuthConstant.JWT_KEY);
         return jwtAccessTokenConverter;
     }
 

@@ -998,7 +998,6 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
 ```java
 import org.auth.config.strategy.redistokenstore.FastjsonRedisTokenStoreSerializationStrategy;
-import org.silentiger.constant.SecretKeyConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

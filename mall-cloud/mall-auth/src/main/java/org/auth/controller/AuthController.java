@@ -20,7 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import java.util.HashMap;
+
+import static org.silentiger.constant.AuthConstant.getOauthTokenAuthorization;
 
 
 @RestController
@@ -43,6 +46,7 @@ public class AuthController {
     public CommonResult<Oauth2TokenDto> postAccessToken(HttpServletRequest request,
                                                 @RequestBody HashMap<String, String> paramsMap) throws HttpRequestMethodNotSupportedException {
         OAuth2AccessToken oAuth2AccessToken = tokenEndpoint.postAccessToken(request.getUserPrincipal(), paramsMap).getBody();
+        assert oAuth2AccessToken != null;
         String tokenValue = oAuth2AccessToken.getValue();
         String username = (String) oAuth2AccessToken.getAdditionalInformation().get("username");
         if (StringUtils.isBlank(tokenValue) || StringUtils.isBlank(username)) {

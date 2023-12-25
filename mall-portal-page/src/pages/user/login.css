@@ -1,0 +1,21 @@
+/* 登录框居中，位于正中间，且固定宽高 */
+.login-form-card {
+    width: 480px;
+    height: 320px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate3d(-50%,-50%, 0);
+}
+.login-form {
+    width: 100%;
+}
+.login-form-forgot {
+    float: right;
+}
+.ant-col-rtl .login-form-forgot {
+    float: left;
+}
+.login-form-button {
+    width: 100%;
+}

@@ -1,7 +1,9 @@
 package org.auth.config.exception;
 
 import org.silentiger.api.CommonResult;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -19,4 +21,5 @@ public class Oauth2ExceptionHandler {
     public CommonResult handleOauth2(OAuth2Exception e) {
         return CommonResult.failed(e.getMessage());
     }
+
 }

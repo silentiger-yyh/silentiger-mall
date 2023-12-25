@@ -19,8 +19,9 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter { //�
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         http.authorizeExchange()
                 .pathMatchers(IgnoreUrlsConfig.urls).permitAll()
-                .anyExchange().access(jwtAccessManager);
-
+                .anyExchange().access(jwtAccessManager)
+                .and()
+                .csrf().disable();  // 不加这个会报错：An expected CSRF token cannot be found
         return http.build();
     }
 }

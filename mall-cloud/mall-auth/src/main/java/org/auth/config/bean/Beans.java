@@ -62,10 +62,10 @@ public class Beans {
      *
      * @return JwtTokenEnhancer
      */
-    @Bean
-    public JwtTokenEnhancer jwtTokenEnhancer() {
-        return new JwtTokenEnhancer();
-    }
+//    @Bean
+//    public JwtTokenEnhancer jwtTokenEnhancer() {
+//        return new JwtTokenEnhancer();
+//    }
 
     /**
      * 设置加密方式

@@ -1,6 +1,7 @@
 package org.auth.config.oauth2;
 
 import jdk.nashorn.internal.parser.TokenStream;
+import org.auth.config.exception.Oauth2ExceptionHandler;
 import org.auth.service.impl.UserDetailsServiceImpl;
 import org.auth.config.bean.JwtTokenEnhancer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,6 +127,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .tokenStore(tokenStore)
 //                .approvalStoreDisabled()
 //                .userApprovalHandler(userApprovalHandler)
+//                .exceptionTranslator(new Oauth2ExceptionHandler())
                 //开启密码授权类型
                 .authenticationManager(authenticationManager)
                 .accessTokenConverter(jwtAccessTokenConverter)

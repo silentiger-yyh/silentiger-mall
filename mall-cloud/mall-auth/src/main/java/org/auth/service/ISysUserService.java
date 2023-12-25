@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author silentiger@yyh
  * @since 2023-12-21
  */
+
 public interface ISysUserService extends IService<SysUser> {
     UserDetail loadUserByUsername(String username);
 }

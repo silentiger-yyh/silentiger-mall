@@ -8,7 +8,7 @@ import {
     readAll,
     selectCount,
     selectIsAllRead, setNotice
-} from "../../../store/actions/noticeSlice";
+} from "../../../store/slice/noticeSlice";
 
 function Index(props) {
     const data = [

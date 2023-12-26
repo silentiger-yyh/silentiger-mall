@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getToken } from "./auth";
+import { getToken } from "../utils/authUtils";
 
 
 const instance = axios.create({
@@ -18,8 +18,7 @@ instance.interceptors.request.use(
       Digest MD5 哈希的 http-basic 认证
       AWS4-HMAC-SHA256 授权
     */
-    console.log(process.env)
-    config.headers["Authorization"] = "Bearer " + getToken();
+    config.headers.Authorization = "Bearer " + getToken();
     return config;
   },
   function (error) {
@@ -33,8 +32,6 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   function (response) {
     // 可以对返回的结果进行过滤，比如，响应中又多层嵌套，我们直接取数据层
-    // Any status code that lie within the range of 2xx cause this function to trigger
-    // Do something with response data
     return response;
   },
   function (error) {

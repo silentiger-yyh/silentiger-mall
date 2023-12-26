@@ -1,20 +1,23 @@
 package org.gateway.config.oauth2;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.Arrays;
 import java.util.List;
 
+
 /**
- * 网关白名单配置，后期需要转移到数据库
- * Created by macro on 2020/3/3.
+ * url白名单
+ *
+ * @Author silentiger@yyh
+ * @Date 2023-12-24 13:19:41
  */
+
 @Data
-//@EqualsAndHashCode(callSuper = false)
-//@Component
-//@ConfigurationProperties(prefix="secure.ignore")
+@EqualsAndHashCode(callSuper = false)
 public class IgnoreUrlsConfig {
-    public static String[] urls = new String[]{
+    public static final String[] urls = new String[]{
             "/doc.html",
             "/swagger-resources/**",
             "/swagger/**",
@@ -23,7 +26,8 @@ public class IgnoreUrlsConfig {
             "/*/*.css",
             "/*/*.png",
             "/*/*.ico",
-            "/mall-auth/oauth/token",
-//            "/mall-cloud-demo/demo/time"
+            "/webjars/**",
+            "/actuator/**",
+            "/mall-auth/oauth/token"
     };
 }

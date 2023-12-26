@@ -9,9 +9,9 @@ import {
 import "./index.css";
 import App from "./App";
 import "antd/dist/antd";
-import { mainRoutes } from "./routes/index";
+import { mainRoutes } from "./routes/route";
 import reportWebVitals from "./reportWebVitals";
-import { isLogined } from "./utils/auth";
+import { isLogined } from "./utils/authUtils";
 import { Provider } from "react-redux";
 import store from "./store/store";
 
@@ -27,20 +27,20 @@ root.render(
         <Switch>
           {/* routeProps 是干嘛的 */}
           <Route
-            path="/admin"
-            key="/admin"
+            path="/home"
+            key="/home"
             render={(routeProps) => <App {...routeProps} />}
           />
           {mainRoutes.map((route) => {
             // 如果已经登陆过，不能重复登录，需要跳转到管理页面
             if (route.path === "/login" && isLogined()) {
-              return <Redirect from="/" to="/admin" key="/admin" />;
+              return <Redirect from="/" to="/home" key="/home" />;
             }
             return <Route key={route.path} {...route}></Route>;
           })}
           {/*Redirect：一般写在所有路由注册的最下方，当所有路由都无法匹配时，跳转到Redirect指定的路由 */}
           {/* 没有匹配到任何路由，访问根路由跳转到admin管理页 */}
-          <Redirect from="/" to="/admin" />
+          <Redirect from="/" to="/home" />
           <Redirect to="/404" />
         </Switch>
       </Router>

@@ -1,20 +1,14 @@
 /* 登录框居中，位于正中间，且固定宽高 */
-.login-form-card {
-    width: 480px;
-    height: 320px;
+div.login-form-card {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate3d(-50%,-50%, 0);
-}
-.login-form {
-    width: 100%;
-}
-.login-form-forgot {
-    float: right;
-}
-.ant-col-rtl .login-form-forgot {
-    float: left;
+    width: 350px;
+    height: 300px;
+    margin: auto; /* 0 auto 水平居中；auto 水平垂直居中 */
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: pink; /* 方便看效果 */
 }
 .login-form-button {
     width: 100%;

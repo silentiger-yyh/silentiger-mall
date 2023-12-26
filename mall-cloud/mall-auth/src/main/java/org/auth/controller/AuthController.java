@@ -10,33 +10,30 @@ import org.silentiger.constant.AuthConstant;
 import org.silentiger.dto.oauth2.Oauth2TokenDto;
 import org.silentiger.enumeration.ResultCodeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import java.util.HashMap;
-
-import static org.silentiger.constant.AuthConstant.getOauthTokenAuthorization;
 
 
 @RestController
 @RequestMapping("/oauth")
-@Api(tags = "AuthController", value = "认证中心登录认证")
+@Api(tags = "认证中心", value = "AuthController")
 public class AuthController {
 
     @Autowired
     private TokenEndpoint tokenEndpoint;
+    @Autowired
+    private TokenStore tokenStore;
 
 
     @PostMapping("/token")
-    @ApiOperation("OAuth2获取token")
+    @ApiOperation("认证")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "username", value = "用户名"),
             @ApiImplicitParam(name = "password", value = "密码"),
@@ -53,6 +50,7 @@ public class AuthController {
             return CommonResult.failed(ResultCodeEnum.FAILED.getMessage());
         }
         Oauth2TokenDto oauth2TokenDto = Oauth2TokenDto.builder()
+                .jti(oAuth2AccessToken.getAdditionalInformation().get("jti").toString())
                 .token(tokenValue)
                 .refreshToken(oAuth2AccessToken.getRefreshToken().getValue())
                 .expiresIn(oAuth2AccessToken.getExpiresIn())
@@ -60,6 +58,27 @@ public class AuthController {
                 .username(username)
                 .build();
         return CommonResult.success(oauth2TokenDto);
+    }
+
+    @GetMapping(value = "/logout")
+    @ApiOperation("登出")
+    public CommonResult logOut(HttpServletRequest request) {
+        String tokenWithPrefix = request.getHeader(AuthConstant.AUTHORIZATION);
+        if (StringUtils.isBlank(tokenWithPrefix)) {
+            return CommonResult.failed("无效TOKEN");
+        }
+        String accessToken = tokenWithPrefix.replace(AuthConstant.JWT_TOKEN_PREFIX, "");
+        OAuth2AccessToken oAuth2AccessToken = tokenStore.readAccessToken(accessToken);
+        if (oAuth2AccessToken != null) {
+            OAuth2RefreshToken oAuth2RefreshToken = oAuth2AccessToken.getRefreshToken();
+            //从tokenStore中移除token
+            tokenStore.removeAccessToken(oAuth2AccessToken);
+            tokenStore.removeRefreshToken(oAuth2RefreshToken);
+            tokenStore.removeAccessTokenUsingRefreshToken(oAuth2RefreshToken);
+            return CommonResult.success(null, "登出成功");
+        } else {
+            return CommonResult.forbidden("token已失效，请勿重复登出");
+        }
     }
 
 }

@@ -24,28 +24,28 @@ export const mainRoutes = [
 
 export const adminRoutes = [
   {
-    path: "/admin/dashboard",
+    path: "/home",
     component: Index,
     isShow: true,
-    title: "看板",
+    title: "主页",
     icon: <AreaChartOutlined />,
   },
-  {
-    path: "/admin/products",
-    component: List,
-    isShow: true,
-    exact: true, // 为true是表示严格匹配，为false时为正常匹配。
-    title: "商品管理",
-    icon: <ShopOutlined />,
-  },
-  {
-    path: "/admin/products/edit/:id?", // ? 表示id是可选参数
-    component: Edit,
-    isShow: false,
-  },
-  {
-    path: "/admin/notice", // ? 表示id是可选参数
-    component: Notice,
-    isShow: false,
-  },
+  // {
+  //   path: "/admin/products",
+  //   component: List,
+  //   isShow: true,
+  //   exact: true, // 为true是表示严格匹配，为false时为正常匹配。
+  //   title: "商品管理",
+  //   icon: <ShopOutlined />,
+  // },
+  // {
+  //   path: "/admin/products/edit/:id?", // ? 表示id是可选参数
+  //   component: Edit,
+  //   isShow: false,
+  // },
+  // {
+  //   path: "/admin/notice", // ? 表示id是可选参数
+  //   component: Notice,
+  //   isShow: false,
+  // },
 ];

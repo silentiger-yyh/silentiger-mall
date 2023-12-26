@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Form, Card, Input, message, Button, Upload } from "antd";
 import { createApi, getOneById, modifyOne } from "../../../service/products";
-import { SERVER_URL } from "../../../utils/config";
+import { SERVER_URL } from "../../../config/globalConfig";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 
 function Edit(props) {

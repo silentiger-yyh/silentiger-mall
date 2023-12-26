@@ -1,96 +1,49 @@
 import React from "react";
-import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Checkbox, Form, Input, Card, Space, message } from "antd";
-import { setToken } from "../../utils/auth";
-import { loginApi } from "../../service/auth";
-import "./login.css";
+import { Card, Space, Form, Input, Button } from "antd-mobile";
+import { setToken } from "../../utils/authUtils";
+import { loginApi } from "../../service/user";
+import './login.css'
 
 function Login(props) {
   // 表单验证通过后调用
   const onFinish = (values) => {
-    // setToken(values.username);
-    // props.history.push("/admin/dashboard");
-    loginApi({
+    console.log(values)
+    loginApi(props, {
       username: values.username,
       password: values.password,
     })
-      .then((res) => {
-        if (res.status === 200) {
-          console.log(res);
-          setToken(res.data.data.token);
-          props.history.push("/admin");
-          message.success("登录成功");
-        } else {
-          message.error("登录失败");
-        }
-      })
-      .catch((err) => {
-        message.error(err.message);
-      });
   };
   return (
-    <Space direction="vertical" size={16}>
-      <Card title="uuY Admin Sys" className="login-form-card">
-        <Form
-          name="normal_login"
-          className="login-form"
-          initialValues={{
-            remember: true,
-          }}
-          onFinish={onFinish}
+    <Card title="uuY Admin Sys" className="login-form-card">
+      <Form
+        className="login-form"
+        layout="horizontal"
+        onFinish={onFinish}
+        // footer={
+        //   <Button block type="submit" onClick={onFinish} color="primary" size="small" className='login-form-button'>
+        //     登录
+        //   </Button>
+        // }
+      >
+        {/* <Form.Header>水平布局表单</Form.Header> */}
+        <Form.Item
+          name="username"
+          label="用户名"
+          rules={[{ required: true, message: "用户名不能为空" }]}
         >
-          <Form.Item
-            name="username"
-            rules={[
-              {
-                required: true,
-                message: "用户名!",
-              },
-            ]}
-          >
-            <Input
-              prefix={<UserOutlined className="site-form-item-icon" />}
-              placeholder="用户名"
-            />
-          </Form.Item>
-          <Form.Item
-            name="password"
-            rules={[
-              {
-                required: true,
-                message: "请输入密码!",
-              },
-            ]}
-          >
-            <Input
-              prefix={<LockOutlined className="site-form-item-icon" />}
-              type="password"
-              placeholder="密码"
-            />
-          </Form.Item>
-          <Form.Item>
-            <Form.Item name="remember" valuePropName="checked" noStyle>
-              <Checkbox>记住我</Checkbox>
-            </Form.Item>
-
-            {/* <a className="login-form-forgot" href="">
-              忘记密码
-            </a> */}
-          </Form.Item>
-
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="login-form-button"
-            >
-              登录
-            </Button>
-            {/* Or <a href="">注册</a> */}
-          </Form.Item>
-        </Form>
-      </Card>
-    </Space>
+          <Input onChange={console.log} placeholder="请输入姓名" />
+        </Form.Item>
+        <Form.Item name="password" label="密码">
+          <Input placeholder='请输入密码' clearable type='password' />
+        </Form.Item>
+        <Form.Item>
+          <Button block color='primary' size='small' type={'submit'} className="login-form-button">
+            登录
+          </Button>
+          {/* Or <a href="">注册</a> */}
+        </Form.Item>
+      </Form>
+    </Card>
   );
 }
 

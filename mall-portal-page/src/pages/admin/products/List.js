@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Table, Button, Popconfirm, message, Image } from "antd";
 import { delOne, listApi, modifyOne } from "../../../service/products";
 import "./list.css";
-import { SERVER_URL } from "../../../utils/config";
+import { SERVER_URL } from "../../../config/globalConfig";
 /*
 useEffect()的参数是一个函数，它就是所要完成的副效应（改变网页标题）。组件加载以后，React 就会执行这个函数。
 useEffect()的作用就是指定一个副效应函数，组件每渲染一次，该函数就自动执行一次。组件首次在网页 DOM 加载后，副效应函数也会执行。

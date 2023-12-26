@@ -16,6 +16,8 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode
 @Builder
 public class Oauth2TokenDto {
+    // jti : JWT ID jwt唯一id，防止被重复使用
+    private String jti;
     // 访问令牌
     private String token;
     // 刷新令牌

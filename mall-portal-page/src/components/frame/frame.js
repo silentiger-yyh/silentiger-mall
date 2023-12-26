@@ -17,13 +17,14 @@ import {
   message,
   Badge,
 } from "antd";
-import { adminRoutes } from "../../routes/index";
+import { adminRoutes } from "../../routes/route";
 import { useHistory, withRouter } from "react-router-dom";
-import logo from "./logo.png";
+import logo from "../../assets/logo1.png";
 import "./frame.css";
-import { clearToken } from "../../utils/auth";
+import { clearToken } from "../../utils/authUtils";
 import {useSelector} from "react-redux";
-import {selectCount, selectIsAllRead} from "../../store/actions/noticeSlice";
+import {selectCount, selectIsAllRead} from "../../store/slice/noticeSlice";
+import {logoutApi} from "../../service/user";
 
 const { Header, Content, Sider } = Layout;
 const routes = adminRoutes.filter((route) => route.isShow);
@@ -41,7 +42,7 @@ const items = [
     label: "退出",
   },
 ];
-function Index(props) {
+function Frame(props) {
   const {
     token: { colorBgContainer },
   } = theme.useToken();
@@ -51,13 +52,12 @@ function Index(props) {
     switch (key) {
       case "logout":
         {
-          clearToken();
-          history.push("/login");
+          logoutApi()
         }
         break;
       case "notice":
         {
-          history.push("/admin/notice");
+          history.push("/home/notice");
         }
         break;
       default:
@@ -69,7 +69,7 @@ function Index(props) {
     <Layout>
       <Header className="header">
         <div className="logo">
-          <img src={logo} alt="logo"></img>
+          <img src={logo} alt="logo" ></img>
         </div>
         <Dropdown menu={{ items, onClick }}>
           <a>
@@ -141,4 +141,4 @@ function Index(props) {
   );
 }
 
-export default Index;
+export default Frame;

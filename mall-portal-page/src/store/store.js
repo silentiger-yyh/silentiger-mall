@@ -12,7 +12,7 @@
 // export default store;
 
 import { configureStore } from "@reduxjs/toolkit";
-import noticeSlice from "./actions/noticeSlice";
+import noticeSlice from "./slice/noticeSlice";
 export default  configureStore({
   reducer: {
     noticeSlice

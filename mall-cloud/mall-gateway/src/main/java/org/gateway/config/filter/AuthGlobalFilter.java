@@ -41,10 +41,6 @@ public class AuthGlobalFilter implements GlobalFilter {
         }
         // 从请求头中获取jwt
         String jwt = request.getHeaders().getFirst(AuthConstant.AUTHORIZATION);
-        if (StringUtils.isBlank(jwt)) {  // null || "" || " "
-            response.setStatusCode(HttpStatus.UNAUTHORIZED);
-            return response.setComplete();
-        }
         // 解析token，将用户信息放到header中
         return chain.filter(exchange); // 放行，流向下一个过滤器
     }

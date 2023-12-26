@@ -2,7 +2,16 @@
     display: flex;
     justify-content: space-between;
     background: #428bca;
+    padding: 0;
 }
 .header a span {
     color: white
+}
+.header div.logo img{
+    width: 200px;
+    padding: 7px 0 5px 10px;
+}
+
+.header .ant-dropdown-trigger {
+    padding-right: 50px;
 }
